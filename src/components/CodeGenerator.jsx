@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'font-awesome/css/font-awesome.min.css';
+import formalLogo from '../logo_formal.png'; // Adjust the path if necessary
 
 const CodeGenerator = () => {
     const [year, setYear] = useState('2025');
@@ -11,34 +12,28 @@ const CodeGenerator = () => {
     const [widthUnit, setWidthUnit] = useState('');
     const [generatedCode, setGeneratedCode] = useState('');
 
-    // Automatically generate the code whenever any of the inputs change
     useEffect(() => {
         const generateCode = () => {
-            // If partName is a plate, include the width with its unit
             const widthStr = (partName === 'WDPLATE' || partName === 'ALUMPLATE') && width && widthUnit
                 ? `${width}${widthUnit}`
                 : '';
 
-            // Build the code dynamically
             const codeParts = [
                 year,
                 systemName,
                 cadId,
                 partName,
-                widthStr, // Only includes width if it has a valid value
+                widthStr,
                 manufacturingMethod,
             ];
 
-            // Filter out any empty parts (to avoid extra underscores)
             const filteredCodeParts = codeParts.filter(part => part);
-
-            // Join the parts with underscores
             const code = filteredCodeParts.join('_');
             setGeneratedCode(code);
         };
 
-        generateCode(); // Trigger code generation whenever any state changes
-    }, [year, systemName, cadId, partName, width, widthUnit, manufacturingMethod]); // Trigger effect on any of these states
+        generateCode();
+    }, [year, systemName, cadId, partName, width, widthUnit, manufacturingMethod]);
 
     const handleCopyCode = () => {
         navigator.clipboard.writeText(generatedCode).then(() => {
@@ -46,16 +41,22 @@ const CodeGenerator = () => {
         });
     };
 
+    const handleCadIdChange = (e) => {
+        const input = e.target.value;
+        if (/^\d{0,3}$/.test(input)) {
+            setCadId(input);
+        }
+    };
+
     return (
         <div style={{ padding: '20px' }}>
-            <h1>FRC CAD Code Generator</h1>
-
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                <img src={formalLogo} alt="Formal Logo" style={{ width: '80px', marginRight: '20px' }} />
+                <h1>FRC CAD Code Generator</h1>
+            </div>
             <div>
                 <label>Year</label>
-                <select
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                >
+                <select value={year} onChange={(e) => setYear(e.target.value)}>
                     <option value="2025">2025 REEFSCPAE</option>
                     <option value="2024">2024 CRESCENDO</option>
                     <option value="2023">2023 CHARGED UP</option>
@@ -71,10 +72,7 @@ const CodeGenerator = () => {
 
             <div>
                 <label>System Name</label>
-                <select
-                    value={systemName}
-                    onChange={(e) => setSystemName(e.target.value)}
-                >
+                <select value={systemName} onChange={(e) => setSystemName(e.target.value)}>
                     <option value="RBT">Robot</option>
                     <option value="BLCKBOT">Block Bots</option>
                     <option value="PTYPE">Prototype</option>
@@ -84,9 +82,10 @@ const CodeGenerator = () => {
             <div>
                 <label>CAD ID</label>
                 <input
-                    type="number"
+                    type="text"
                     value={cadId}
-                    onChange={(e) => setCadId(e.target.value)}
+                    onChange={handleCadIdChange}
+                    maxLength="3"
                 />
             </div>
 
@@ -96,7 +95,6 @@ const CodeGenerator = () => {
                     value={partName}
                     onChange={(e) => {
                         setPartName(e.target.value);
-                        // Reset width and unit if part is not a plate
                         if (e.target.value !== 'WDPLATE' && e.target.value !== 'ALUMPLATE') {
                             setWidth('');
                             setWidthUnit('');
@@ -119,7 +117,6 @@ const CodeGenerator = () => {
                 </select>
             </div>
 
-            {/* Only show width input if partName is WDPLATE or ALUMPLATE */}
             {(partName === 'WDPLATE' || partName === 'ALUMPLATE') && (
                 <div>
                     <label>Width of Plate</label>
@@ -130,10 +127,7 @@ const CodeGenerator = () => {
                             value={width}
                             onChange={(e) => setWidth(e.target.value)}
                         />
-                        <select
-                            value={widthUnit}
-                            onChange={(e) => setWidthUnit(e.target.value)}
-                        >
+                        <select value={widthUnit} onChange={(e) => setWidthUnit(e.target.value)}>
                             <option value="I">Inches</option>
                             <option value="M">Centimeters</option>
                         </select>
@@ -143,10 +137,7 @@ const CodeGenerator = () => {
 
             <div>
                 <label>Manufacturing Method</label>
-                <select
-                    value={manufacturingMethod}
-                    onChange={(e) => setManufacturingMethod(e.target.value)}
-                >
+                <select value={manufacturingMethod} onChange={(e) => setManufacturingMethod(e.target.value)}>
                     <option value="CNC">CNC</option>
                     <option value="3DP">3D</option>
                     <option value="LSR">LASER</option>
@@ -155,7 +146,6 @@ const CodeGenerator = () => {
                 </select>
             </div>
 
-            {/* Code Generation and Copy Code Button */}
             {generatedCode && (
                 <div style={styles.codeContainer}>
                     <span>{generatedCode}</span>
@@ -164,7 +154,7 @@ const CodeGenerator = () => {
                         onClick={handleCopyCode}
                         title="Copy to clipboard"
                     >
-                        <i className="fa fa-copy"></i> {/* FontAwesome Copy Icon */}
+                        <i className="fa fa-copy"></i>
                     </button>
                 </div>
             )}
@@ -172,10 +162,8 @@ const CodeGenerator = () => {
     );
 };
 
-// CSS styling for the code container and copy button
 const styles = {
     codeContainer: {
-        marginTop: '20px',
         padding: '15px',
         backgroundColor: '#f4f4f4',
         border: '1px solid #ccc',
@@ -183,7 +171,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontFamily: 'monospace', // Ensuring the font matches code font
+        fontFamily: 'monospace',
     },
     copyButton: {
         backgroundColor: '#d4af37',
