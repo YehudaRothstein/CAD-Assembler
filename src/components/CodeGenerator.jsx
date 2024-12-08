@@ -1,96 +1,200 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import 'font-awesome/css/font-awesome.min.css';
 
-const CodeGenerator = ({ addToHistory }) => {
-    const [cadId, setCadId] = useState('');
-    const [system, setSystem] = useState('RBT');
-    const [part, setPart] = useState('WDPLATE');
-    const [method, setMethod] = useState('CNC');
+const CodeGenerator = () => {
     const [year, setYear] = useState('2025');
-    const [code, setCode] = useState('');
+    const [systemName, setSystemName] = useState('RBT');
+    const [cadId, setCadId] = useState('');
+    const [partName, setPartName] = useState('');
+    const [manufacturingMethod, setManufacturingMethod] = useState('');
+    const [width, setWidth] = useState('');
+    const [widthUnit, setWidthUnit] = useState('');
+    const [generatedCode, setGeneratedCode] = useState('');
 
-    const handleGenerateCode = () => {
-        if (!cadId || cadId.length !== 3) {
-            alert('Please enter a valid 3-digit CAD ID!');
-            return;
-        }
+    // Automatically generate the code whenever any of the inputs change
+    useEffect(() => {
+        const generateCode = () => {
+            // If partName is a plate, include the width with its unit
+            const widthStr = (partName === 'WDPLATE' || partName === 'ALUMPLATE') && width && widthUnit
+                ? `${width}${widthUnit}`
+                : '';
 
-        const generatedCode = `${year}_${system}_${cadId}_${part}_${method}`;
-        setCode(generatedCode);
-        addToHistory(generatedCode);
+            // Build the code dynamically
+            const codeParts = [
+                year,
+                systemName,
+                cadId,
+                partName,
+                widthStr, // Only includes width if it has a valid value
+                manufacturingMethod,
+            ];
 
-        // Copy to clipboard
+            // Filter out any empty parts (to avoid extra underscores)
+            const filteredCodeParts = codeParts.filter(part => part);
+
+            // Join the parts with underscores
+            const code = filteredCodeParts.join('_');
+            setGeneratedCode(code);
+        };
+
+        generateCode(); // Trigger code generation whenever any state changes
+    }, [year, systemName, cadId, partName, width, widthUnit, manufacturingMethod]); // Trigger effect on any of these states
+
+    const handleCopyCode = () => {
         navigator.clipboard.writeText(generatedCode).then(() => {
             alert('Code copied to clipboard!');
         });
-
-        // Clear input
-        setCadId('');
     };
 
     return (
-        <div className="code-generator">
-            <h1>Excalibur 6738 CAD Code Generator</h1>
+        <div style={{ padding: '20px' }}>
+            <h1>FRC CAD Code Generator</h1>
 
-            <label>Year:</label>
-            <select value={year} onChange={(e) => setYear(e.target.value)}>
-                <option value="2025">2025 REEFSCPAE</option>
-                <option value="2024">2024 CRESCENDO</option>
-                <option value="2023">2023 CHARGED UP</option>
-                <option value="2022">2022 RAPID REACT</option>
-                <option value="2021">2021 INFINITE RECHARGE </option>
-                <option value="2020">2020 INFINITE RECHARGE</option>
-                <option value="2019">2019 DEEP SPACE</option>
-                <option value="2018">2018 POWER UP</option>
-                <option value="2017">2017 STEAMWORKS</option>
-                <option value="2016">2016 STRONGHOLD</option>
-            </select>
+            <div>
+                <label>Year</label>
+                <select
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                >
+                    <option value="2025">2025 REEFSCPAE</option>
+                    <option value="2024">2024 CRESCENDO</option>
+                    <option value="2023">2023 CHARGED UP</option>
+                    <option value="2022">2022 RAPID REACT</option>
+                    <option value="2021">2021 INFINITE RECHARGE</option>
+                    <option value="2020">2020 INFINITE RECHARGE</option>
+                    <option value="2019">2019 DEEP SPACE</option>
+                    <option value="2018">2018 POWER UP</option>
+                    <option value="2017">2017 STEAMWORKS</option>
+                    <option value="2016">2016 STRONGHOLD</option>
+                </select>
+            </div>
 
-            <label>CAD ID (3-digit):</label>
-            <input
-                type="text"
-                value={cadId}
-                maxLength="3"
-                onChange={(e) => setCadId(e.target.value)}
-                placeholder="Enter 3-digit CAD ID"
-            />
+            <div>
+                <label>System Name</label>
+                <select
+                    value={systemName}
+                    onChange={(e) => setSystemName(e.target.value)}
+                >
+                    <option value="RBT">Robot</option>
+                    <option value="BLCKBOT">Block Bots</option>
+                    <option value="PTYPE">Prototype</option>
+                </select>
+            </div>
 
-            <label>System:</label>
-            <select value={system} onChange={(e) => setSystem(e.target.value)}>
-                <option value="RBT">Robot</option>
-                <option value="BLCKBOT">Block Bot</option>
-                <option value="PTYPE">Prototype</option>
-            </select>
+            <div>
+                <label>CAD ID</label>
+                <input
+                    type="number"
+                    value={cadId}
+                    onChange={(e) => setCadId(e.target.value)}
+                />
+            </div>
 
-            <label>Part:</label>
-            <select value={part} onChange={(e) => setPart(e.target.value)}>
-                <option value="WDPLATE">Wood Plate</option>
-                <option value="ALUMPLATE">Aluminium Plate</option>
-                <option value="PRFL">Profile</option>
-                <option value="PLLY">Poly Wheels</option>
-                <option value="3DPRNT">3D Prints</option>
-                <option value="AXS">Axis</option>
-                <option value="WHLS">Wheels</option>
-                <option value="VRSA">Versa</option>
-                <option value="KRAKN">Kraken</option>
-                <option value="NEO">NEO</option>
-                <option value="BNEO">Baby NEO</option>
-                <option value="VRTEX">Vortex</option>
-            </select>
+            <div>
+                <label>Part Name</label>
+                <select
+                    value={partName}
+                    onChange={(e) => {
+                        setPartName(e.target.value);
+                        // Reset width and unit if part is not a plate
+                        if (e.target.value !== 'WDPLATE' && e.target.value !== 'ALUMPLATE') {
+                            setWidth('');
+                            setWidthUnit('');
+                        }
+                    }}
+                >
+                    <option value="">Select Part</option>
+                    <option value="WDPLATE">Wood Plate</option>
+                    <option value="ALUMPLATE">Aluminum Plate</option>
+                    <option value="PRFL">Profile</option>
+                    <option value="PLLY">Poly wheels</option>
+                    <option value="3DPRNT">3D prints</option>
+                    <option value="AXS">Axis</option>
+                    <option value="WHLS">Wheels</option>
+                    <option value="VRSA">Versa</option>
+                    <option value="KRAKN">Kraken Motor</option>
+                    <option value="NEO">NEO Motor</option>
+                    <option value="BNEO">Baby NEO Motor</option>
+                    <option value="VRTEX">Vortex Motor</option>
+                </select>
+            </div>
 
-            <label>Manufacturing Method:</label>
-            <select value={method} onChange={(e) => setMethod(e.target.value)}>
-                <option value="CNC">CNC</option>
-                <option value="3DP">3D</option>
-                <option value="LSR">Laser</option>
-                <option value="MNAL">Manual</option>
-                <option value="SPNSR">Sponsors</option>
-            </select>
+            {/* Only show width input if partName is WDPLATE or ALUMPLATE */}
+            {(partName === 'WDPLATE' || partName === 'ALUMPLATE') && (
+                <div>
+                    <label>Width of Plate</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                            type="number"
+                            placeholder="Width"
+                            value={width}
+                            onChange={(e) => setWidth(e.target.value)}
+                        />
+                        <select
+                            value={widthUnit}
+                            onChange={(e) => setWidthUnit(e.target.value)}
+                        >
+                            <option value="I">Inches</option>
+                            <option value="M">Centimeters</option>
+                        </select>
+                    </div>
+                </div>
+            )}
 
-            <button onClick={handleGenerateCode}>Generate Code</button>
+            <div>
+                <label>Manufacturing Method</label>
+                <select
+                    value={manufacturingMethod}
+                    onChange={(e) => setManufacturingMethod(e.target.value)}
+                >
+                    <option value="CNC">CNC</option>
+                    <option value="3DP">3D</option>
+                    <option value="LSR">LASER</option>
+                    <option value="MNAL">MANUAL</option>
+                    <option value="SPNSR">SPONSORS</option>
+                </select>
+            </div>
 
-            {code && <p className="generated-code">Generated Code: {code}</p>}
+            {/* Code Generation and Copy Code Button */}
+            {generatedCode && (
+                <div style={styles.codeContainer}>
+                    <span>{generatedCode}</span>
+                    <button
+                        style={styles.copyButton}
+                        onClick={handleCopyCode}
+                        title="Copy to clipboard"
+                    >
+                        <i className="fa fa-copy"></i> {/* FontAwesome Copy Icon */}
+                    </button>
+                </div>
+            )}
         </div>
     );
+};
+
+// CSS styling for the code container and copy button
+const styles = {
+    codeContainer: {
+        marginTop: '20px',
+        padding: '15px',
+        backgroundColor: '#f4f4f4',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        fontFamily: 'monospace', // Ensuring the font matches code font
+    },
+    copyButton: {
+        backgroundColor: '#d4af37',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        padding: '8px 12px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+    }
 };
 
 export default CodeGenerator;
