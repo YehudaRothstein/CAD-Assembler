@@ -1,0 +1,56 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #012265;
+    color: #d4af37;
+}
+
+.app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.code-generator,
+.code-history {
+    margin-bottom: 30px;
+    background-color: #012265;
+    padding: 20px;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #d4af37;
+    border-radius: 5px;
+    background-color: #012265;
+    color: #d4af37;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #d4af37;
+    color: #012265;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #bfa231;
+}
+
+.generated-code {
+    margin-top: 10px;
+    font-weight: bold;
+}
